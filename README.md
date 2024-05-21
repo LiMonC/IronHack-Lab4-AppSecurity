@@ -53,14 +53,22 @@ DEFINE FUNCTION generateJWT(userCredentials):
   ELSE:
     RETURN error
 ```
+
 #### JWT Authentication Design Document:
+The function is missing the Standard JWT Authentication that consists: 
+- The header: consists of two parts—the token type, which is JWT, and a signing algorithm, such as HMAC-SHA256 or RSA
+- The payload: contains the claims—in other words, the statements about an entity (typically, the user) and additional data
+- The signature: used to verify the JWT's integrity
 ```
 DEFINE FUNCTION generateJWT(userCredentials):
   IF validateCredentials(userCredentials):
     SET tokenExpiration = currentTime + 3600 // Token expires in one hour
-    RETURN encrypt(userCredentials + tokenExpiration, secretKey)
-  ELSE:
-    RETURN error
+    RETURN jwt.builder()
+            .setSubject(userCredentials.username + tokenExpiration)
+            .sign(SignatureAlgorithm.HS256, secretKey);
+    ELSE:
+      RETURN new BadRequestError("Login error");
+
 ```
 
 ### Scenario 3: Secure Data Communication Plan
